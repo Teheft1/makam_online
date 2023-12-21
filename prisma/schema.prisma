@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model jobdesk_petugas {
+  id_jobdesk_petugas   Int             @id @default(autoincrement())
+  nama_jobdesk_petugas String?
+  ID_petugas           Int
+  id_layanan           Int
+  petugas_layanan      petugas_layanan @relation(fields: [ID_petugas], references: [ID_Petugas])
+  layanan              layanan         @relation(fields: [id_layanan], references: [ID_Layanan])
+
+  @@index([ID_petugas], map: "jobdesk_petugas_ID_petugas_fkey")
+  @@index([id_layanan], map: "jobdesk_petugas_id_layanan_fkey")
+}
+
+model kelas_makam {
+  ID_kelas_makam   Int             @id @default(autoincrement())
+  Nama_kelas_makam String
+  Harga_kelas      Int
+  layanan_kelas    layanan_kelas[]
+  makam            makam[]
+  order_makam      order_makam[]
+}
+
+model layanan {
+  ID_Layanan        Int               @id @default(autoincrement())
+  Jenis_Layanan     String
+  Deskripsi_layanan String
+  Harga_layanan     Decimal
+  jobdesk_petugas   jobdesk_petugas[]
+  layanan_kelas     layanan_kelas[]
+  order_layanan     order_layanan[]
+}
+
+model layanan_kelas {
+  ID_layanan_kelas Int         @id @default(autoincrement())
+  ID_Layanan       Int
+  ID_kelas_makam   Int
+  layanan          layanan     @relation(fields: [ID_Layanan], references: [ID_Layanan])
+  kelas_makam      kelas_makam @relation(fields: [ID_kelas_makam], references: [ID_kelas_makam])
+
+  @@index([ID_Layanan], map: "layanan_kelas_ID_Layanan_fkey")
+  @@index([ID_kelas_makam], map: "layanan_kelas_ID_kelas_makam_fkey")
+}
+
+model makam {
+  ID_Pemakaman      Int
+  ID_kelas_makam    Int
+  ID_PJ             Int
+  Nama_belasungkawa String?
+  Tanggal_Wafat     DateTime?
+  Nomor_Makam       String             @id @unique(map: "Makam_Nomor_Makam_key")
+  Status_Makam      makam_Status_Makam
+  catatan_makam     String?
+  pj_makam          pj_makam           @relation(fields: [ID_PJ], references: [ID_PJ], map: "Makam_ID_PJ_fkey")
+  pemakaman         pemakaman          @relation(fields: [ID_Pemakaman], references: [ID_Pemakaman], map: "Makam_ID_Pemakaman_fkey")
+  kelas_makam       kelas_makam        @relation(fields: [ID_kelas_makam], references: [ID_kelas_makam], map: "Makam_ID_kelas_makam_fkey")
+  order_layanan     order_layanan?
+
+  @@index([ID_PJ], map: "Makam_ID_PJ_fkey")
+  @@index([ID_Pemakaman], map: "Makam_ID_Pemakaman_fkey")
+  @@index([ID_kelas_makam], map: "Makam_ID_kelas_makam_fkey")
+}
+
+model order_layanan {
+  ID_order_layanan Int      @id @default(autoincrement())
+  ID_Layanan       Int
+  Nomor_makams     String   @unique(map: "order_Layanan_Nomor_makams_key")
+  nama_pemesan     String
+  telp_pemesan     String
+  tanggal_order    DateTime
+  tanggal_layanan  DateTime
+  Status_layanan   String
+  layanan          layanan  @relation(fields: [ID_Layanan], references: [ID_Layanan], map: "order_Layanan_ID_Layanan_fkey")
+  makam            makam    @relation(fields: [Nomor_makams], references: [Nomor_Makam], map: "order_Layanan_Nomor_makams_fkey")
+
+  @@index([ID_Layanan], map: "order_Layanan_ID_Layanan_fkey")
+}
+
+model order_makam {
+  ID_Order_makam    Int         @id @default(autoincrement())
+  ID_Kelas_Makam    Int
+  Nama_belasungkawa String?
+  Tanggal_Wafat     DateTime?
+  Nama_Pemesan      String
+  Telp_pemesan      String
+  Status_order      String?
+  Tanggal_order     DateTime
+  kelas_makam       kelas_makam @relation(fields: [ID_Kelas_Makam], references: [ID_kelas_makam], map: "Order_Makam_ID_Kelas_Makam_fkey")
+
+  @@index([ID_Kelas_Makam], map: "Order_Makam_ID_Kelas_Makam_fkey")
+}
+
+model pemakaman {
+  ID_Pemakaman        Int     @id @default(autoincrement())
+  Nama_Pemakaman      String
+  Alamat_Pemakaman    String
+  Deskripsi_Pemakaman String
+  makam               makam[]
+}
+
+model petugas_layanan {
+  ID_Petugas      Int               @id @default(autoincrement())
+  Nama_petugas    String
+  Telp_petugas    String
+  ID_PJ           Int
+  jobdesk_petugas jobdesk_petugas[]
+  pj_makam        pj_makam          @relation(fields: [ID_PJ], references: [ID_PJ], map: "Petugas_layanan_ID_PJ_fkey")
+
+  @@index([ID_PJ], map: "Petugas_layanan_ID_PJ_fkey")
+}
+
+model pj_makam {
+  ID_PJ           Int               @id @unique @default(autoincrement())
+  Nama_PJ         String
+  Telp_PJ         String
+  makam           makam[]
+  petugas_layanan petugas_layanan[]
+}
+
+enum makam_Status_Makam {
+  Filled
+  Available
+  Ordered
+}
