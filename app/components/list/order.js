@@ -1,8 +1,18 @@
 "use client";
+import { stringify } from "postcss";
 import React, { useEffect, useState } from "react";
-
 const Order = () => {
   const [order, setOrder] = useState([]);
+  // const [newMakam, setNewMakam] = useState({
+  //   ID_Pemakaman: 1,
+  //   ID_Kelas_Makam: "",
+  //   ID_PJ: 1,
+  //   Nomor_Makam: "",
+  //   Nama_belasungkawa: "",
+  //   Tanggal_Wafat: "",
+  //   Status_Makam: "",
+  // });
+  const [nomer, setNomer] = useState("");
   useEffect(() => {
     const fetchOrder = async () => {
       try {
@@ -11,7 +21,6 @@ const Order = () => {
         });
         const res = await data.json();
         setOrder(res);
-        console.log(res);
       } catch (err) {
         console.log(err);
       }
@@ -28,6 +37,54 @@ const Order = () => {
       body: JSON.stringify({ Status_order: "Disetujui" }),
     });
     const data = await res.json();
+    // const file = JSON.stringify(data);
+    let status;
+    if (data.Nama_belasungkawa == null || data.Nama_belasungkawa == "null") {
+      status = "Ordered";
+    } else {
+      status = "Filled";
+    }
+    let nomor;
+    if (data.ID_Kelas_Makam == 1) {
+      nomor = "A" + Math.floor(Math.random() * 900) + 100;
+      console.log(nomor);
+      setNomer(nomor);
+    } else if (data.ID_Kelas_Makam == 2) {
+      nomor = "B" + Math.floor(Math.random() * 900) + 100;
+      console.log(nomor);
+      setNomer(nomor);
+    } else if (data.ID_Kelas_Makam == 3) {
+      nomor = "C" + Math.floor(Math.random() * 900) + 100;
+      console.log(nomor);
+      setNomer(nomor);
+    } else if (data.ID_Kelas_Makam == 4) {
+      nomor = "D" + Math.floor(Math.random() * 900) + 100;
+      console.log(nomor);
+      setNomer(nomor);
+    }
+    console.log(nomor);
+    const nums = 1;
+    const newMakam = {
+      ID_pemakaman: nums,
+      ID_Kelas_Makam: data.ID_Kelas_Makam,
+      ID_PJ: nums,
+      Nomor_Makam: nomor,
+      Nama_belasungkawa: data.Nama_belasungkawa,
+      Tanggal_Wafat: data.Tanggal_Wafat,
+      Status_Makam: status,
+    };
+
+    const news = await fetch(`http://localhost:3000/api/makam`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newMakam),
+    });
+
+    console.log(news);
+
+    // updating the local data
     const updatedData = order.map((item) =>
       item.ID_Order_makam === id ? { ...item, Status_order: "Disetujui" } : item
     );
@@ -74,7 +131,11 @@ const Order = () => {
                     : "bg-gray-400 px-2 py-1 rounded-full"
                 }`}
               >
-                {item.Status_order === null ? "Pending" : item.Status_order}
+                {item.Status_order === null
+                  ? "Pending"
+                  : item.Status_order === "null"
+                  ? "Pending"
+                  : item.Status_order}
               </p>
               <button
                 onClick={() => handleAccept(item.ID_Order_makam)}
