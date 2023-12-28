@@ -28,6 +28,5 @@ export async function POST(req, res) {
   });
   if (!order) return NextResponse.error(new Error("Gagal membuat order"));
 
-  console.log(order);
   return NextResponse.json(order);
 }
