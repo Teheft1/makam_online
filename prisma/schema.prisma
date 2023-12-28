@@ -50,21 +50,21 @@ model layanan_kelas {
 }
 
 model makam {
-  ID_Pemakaman      Int
+  Nomor_Makam       String             @id @unique(map: "Makam_Nomor_Makam_key")
+  ID_pemakaman      Int
   ID_kelas_makam    Int
   ID_PJ             Int
   Nama_belasungkawa String?
   Tanggal_Wafat     DateTime?
-  Nomor_Makam       String             @id @unique(map: "Makam_Nomor_Makam_key")
   Status_Makam      makam_Status_Makam
   catatan_makam     String?
   pj_makam          pj_makam           @relation(fields: [ID_PJ], references: [ID_PJ], map: "Makam_ID_PJ_fkey")
-  pemakaman         pemakaman          @relation(fields: [ID_Pemakaman], references: [ID_Pemakaman], map: "Makam_ID_Pemakaman_fkey")
+  pemakaman         pemakaman?          @relation(fields: [ID_pemakaman], references: [ID_Pemakaman], map: "Makam_ID_pemakaman_Fkey")
   kelas_makam       kelas_makam        @relation(fields: [ID_kelas_makam], references: [ID_kelas_makam], map: "Makam_ID_kelas_makam_fkey")
   order_layanan     order_layanan?
 
   @@index([ID_PJ], map: "Makam_ID_PJ_fkey")
-  @@index([ID_Pemakaman], map: "Makam_ID_Pemakaman_fkey")
+  @@index([ID_pemakaman], map: "Makam_ID_pemakaman_Fkey")
   @@index([ID_kelas_makam], map: "Makam_ID_kelas_makam_fkey")
 }
 
